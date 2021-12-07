@@ -1,0 +1,16 @@
+{
+  "story": [
+    "The {adjective1} {noun1} {verb} the {adjective2} {noun2}.",
+    "Another line.",
+    "Yet another line!"
+  ],
+  "prompts": {
+    "noun1": "Type a noun: ",
+    "noun2": "Type another noun: ",
+    "adjective1": "Type an adjective: ",
+    "adjective2": "Type another adjective: ",
+    "verb": "Type a verb (ate, walked): "
+  },
+  "order": "noun1;adjective1;noun2;adjective2;verb;",
+  "author": "Sam Wagenaar"
+}

@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+apply plugin: 'java'
+
+group 'ip.swagenaar25.samlibs'
+archivesBaseName = 'SamLibs'
+version '0.1-ALPHA'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'ip.swagenaar25.samlibs.MainGUI'
+    }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation 'org.json:json:20211205'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task run(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    mainClass = jar.manifest.attributes.get('Main-Class')
+    args "--dev"
+}
