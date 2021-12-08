@@ -20,6 +20,7 @@ public class Samlib {
 	protected String rawStory;
 	protected String rawOrder;
 	public boolean initialized;
+	public int inputIndex = 0;
 
 	protected static String STORY_TAG = "story";
 	protected static String PROMPTS_TAG = "prompts";
@@ -64,7 +65,7 @@ public class Samlib {
 		}
 		this.rawStory += story_array.getString(story_array.length()-1);
 
-		if (rawStory.isEmpty()) {
+		if (this.rawStory.isEmpty()) {
 			throw new JSONStructureException("Empty story");
 		}
 
@@ -108,17 +109,17 @@ public class Samlib {
 		}
 
 		//load order
-		String rawStory = json.getString(ORDER_TAG);
+		this.rawOrder = json.getString(ORDER_TAG);
 
-		if (rawStory.isEmpty()) {
-			throw new JSONStructureException("Empty story");
+		if (this.rawOrder.isEmpty()) {
+			throw new JSONStructureException("Empty order");
 		}
 
 		//parse order
 		word = "";
 		int index = 0;
-		for (int i = 0; i < this.rawStory.length(); i++) {
-			String c = this.rawStory.substring(i, i+1);
+		for (int i = 0; i < this.rawOrder.length(); i++) {
+			String c = this.rawOrder.substring(i, i+1);
 			if (c.equals(";")) {
 				this.orderedWords.put(index, word);
 				word = "";
@@ -126,13 +127,6 @@ public class Samlib {
 			} else {
 				word += c;
 			}
-		}
-		for (String w : this.words) {
-			System.out.println("Word: "+w);
-		}
-
-		for (String w : this.orderedWords.values()) {
-			System.out.println("OrderedWord: "+w);
 		}
 
 		for (String w : this.words) {
