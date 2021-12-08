@@ -8,21 +8,20 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
 public class Samlib {
 	
 	public String[] words;
-	public HashMap<Integer, String> orderedWords;
+	public HashMap<Integer, String> orderedWords; //(index:word)
 	public HashMap<String, String> prompts; //(word:prompt)
-	public HashMap<String, String> wordChoices;
+	public HashMap<String, String> wordChoices;//(word:choice)
 	public String author;
 	protected String rawStory;
 	protected String rawOrder;
 	public boolean initialized;
-	public int inputIndex = 0;
+	public int inputIndex;
 
 	protected static String STORY_TAG = "story";
 	protected static String PROMPTS_TAG = "prompts";
@@ -31,6 +30,7 @@ public class Samlib {
 	
 	public Samlib() {
 		initialized = false;
+		inputIndex = 0;
 	}
 
 	public String currentWord() {
@@ -42,7 +42,7 @@ public class Samlib {
 	}
 
 	public void pushInput(String input) {
-		this.wordChoices.put(this.currentWord(), input);
+		this.wordChoices.put(this.currentWord(), input.replace("{", "").replace("}", ""));
 		this.inputIndex++;
 	}
 	
