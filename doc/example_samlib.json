@@ -2,7 +2,8 @@
   "story": [
     "The {adjective1} {noun1} {verb} the {adjective2} {noun2}.",
     "Another line.",
-    "Yet another line!"
+    "Yet another line!",
+    "And this one\nis split\tinto multiple\rparts with special \\characters."
   ],
   "prompts": {
     "noun1": "Type a noun: ",

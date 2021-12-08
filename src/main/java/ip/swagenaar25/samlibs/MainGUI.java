@@ -3,38 +3,43 @@ package ip.swagenaar25.samlibs;
 /*
  * Author: Sam Wagenaar
  * Created: 1 December 2021
- * Modified: 6 December 2021
+ * Modified: 8 December 2021
  * Purpose: Fun Madlibs!
  * Class: Introduction to Programming
  */
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Objects;
-import java.util.Scanner;
+
+import static ip.swagenaar25.samlibs.OutputFormat.*;
 
 public class MainGUI extends JFrame implements ActionListener {
 
 	public static boolean DEV = false;
-	public Scanner kboard;
+
 	protected JTextField input;
 	protected JTextPane output;
 	protected ArrayDeque<String> inputs;
 	protected Console console;
+	protected Samlib samlib;
+	protected Stage stage;
 
 	public MainGUI() {
-		kboard = new Scanner(System.in); //TEMP
+		this.stage = Stage.GET_FILE;
 
 		//set up inputs storage
 		inputs = new ArrayDeque<>();
 
 		//set up input field
 		input = new JTextField();
-		input.setToolTipText("Input");
 		input.addActionListener(this);
 		getContentPane().add(input, BorderLayout.SOUTH); //add it to the window
 		input.setColumns(10);
@@ -44,16 +49,31 @@ public class MainGUI extends JFrame implements ActionListener {
 		output.setFont(new Font("Sylfaen", Font.PLAIN, 18));
 		output.setText("Sample Text");
 		output.setAutoscrolls(true);
-		output.setDisabledTextColor(output.getSelectedTextColor());
-		output.setEnabled(false);
+		output.setFocusable(false);
 		getContentPane().add(output, BorderLayout.CENTER);
 
 		//set up manager for output
 		console = new Console(output).clear();
 	}
 
-	public void init() {
+	public void init() throws IOException {
+		this.input.setText("");
+		this.console.clear();
 		this.input.requestFocusInWindow();
+
+		JFileChooser filePicker = new JFileChooser();
+		filePicker.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
+		filePicker.setCurrentDirectory(new File(Util.getJarPath()));
+		this.console.println("Please select a file.", INFO);
+		filePicker.showOpenDialog(null);
+		File file = filePicker.getSelectedFile();
+		if (file==null) {
+			this.close();
+		}
+
+		this.samlib = new Samlib().build(file);
+		this.stage = Stage.GET_INPUTS;
+		this.console.println(this.samlib.currentPrompt(), PROMPT);
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -63,8 +83,7 @@ public class MainGUI extends JFrame implements ActionListener {
 				DEV = true;
 			}
 		}
-		String file = "doc/example_samlib.json";
-		Samlib test = new Samlib().build(file);
+
 		MainGUI gui = new MainGUI();
 
 		gui.setTitle("SamLibs");
@@ -74,36 +93,50 @@ public class MainGUI extends JFrame implements ActionListener {
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setVisible(true);
 		gui.init();
-
-		for (int i=0; i<test.words.length; i++) {
-			String word = test.orderedWords.getOrDefault(i, "BROKEN WORD FOR INDEX: "+i);
-			String choice = gui.getWord(test.prompts.getOrDefault(word,
-					"The author of this samlib messed up, please enter the best input you can for the word ["+word+"]: "));
-			test.wordChoices.put(word, choice);
-		}
-
-		gui.showStory(test.getFilledStory());
 	}
 
-	public String getWord(String prompt) {
-		this.console.println(prompt);
-		String input = this.getInput().replace("{","").replace("}","");
-		this.console.println("> "+input);
-		return input;
-	}
-
-	public void showStory(String story) {
-		System.out.println(story);
-	}
-
-	protected String getInput() {
-		while (this.inputs.isEmpty()) {}
-		return this.inputs.poll();
+	protected void close() {
+		this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		System.out.println(e.getActionCommand());
-		this.inputs.add(e.getActionCommand());
+		String input = e.getActionCommand();
+		if (this.stage == Stage.GET_INPUTS) {
+			this.samlib.pushInput(input);
+			this.console.println("> "+input, USER_RESPONSE);
+			this.input.setText("");
+			String prompt = this.samlib.currentPrompt();
+			if (prompt != null) {
+				this.console.println(prompt, PROMPT);
+			}
+			if (this.samlib.inputIndex==this.samlib.words.length) {
+				this.stage = Stage.SHOW_STORY;
+				this.console.println(this.samlib.getFilledStory(), STORY);
+				this.stage = Stage.GO_AGAIN;
+				this.console.println("Play again? ", PROMPT);
+			}
+		} else if (this.stage == Stage.GO_AGAIN) {
+			this.console.println("> "+input, USER_RESPONSE);
+			this.input.setText("");
+			boolean again = input.substring(0, 1).equalsIgnoreCase("y");
+			if (again) {
+				try {
+					this.init();
+				} catch (IOException ex) {
+					ex.printStackTrace();
+					this.close();
+				}
+			} else {
+				this.close();
+			}
+		}
+	}
+
+	protected enum Stage {
+		GET_FILE,
+		GET_INPUTS,
+		SHOW_STORY,
+		GO_AGAIN
 	}
 }

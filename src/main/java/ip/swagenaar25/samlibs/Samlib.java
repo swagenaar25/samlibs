@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +18,7 @@ public class Samlib {
 	public HashMap<Integer, String> orderedWords;
 	public HashMap<String, String> prompts; //(word:prompt)
 	public HashMap<String, String> wordChoices;
+	public String author;
 	protected String rawStory;
 	protected String rawOrder;
 	public boolean initialized;
@@ -25,21 +27,26 @@ public class Samlib {
 	protected static String STORY_TAG = "story";
 	protected static String PROMPTS_TAG = "prompts";
 	protected static String ORDER_TAG = "order";
+	protected static String AUTHOR_TAG = "author";
 	
 	public Samlib() {
 		initialized = false;
 	}
-	
-	public Samlib(String filename) {
-		this();
-		try {
-			this.build(filename);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+	public String currentWord() {
+		return this.orderedWords.get(this.inputIndex);
+	}
+
+	public String currentPrompt() {
+		return this.prompts.get(this.currentWord());
+	}
+
+	public void pushInput(String input) {
+		this.wordChoices.put(this.currentWord(), input);
+		this.inputIndex++;
 	}
 	
-	public Samlib build(String filename) throws IOException {
+	public Samlib build(File file) throws IOException {
 		initialized = true;
 
 		//initialize variables
@@ -49,7 +56,7 @@ public class Samlib {
 		this.wordChoices = new HashMap<>();
 		this.orderedWords = new HashMap<>();
 
-		Path path = Path.of(Util.getJarPath(), filename);
+		Path path = Path.of(file.getAbsolutePath());
 		String content = Files.readString(path);
 		JSONObject json = new JSONObject(new JSONTokener(content));
 
@@ -135,6 +142,9 @@ public class Samlib {
 			}
 		}
 
+		//load author
+		this.author = json.optString(AUTHOR_TAG, "Unknown");
+
 		return this;
 	}
 
@@ -145,6 +155,7 @@ public class Samlib {
 				story = story.replace("{" + word + "}", this.wordChoices.getOrDefault(word, "[BROKEN INPUT]"));
 			}
 		}
+		story += "\nBy: "+this.author;
 		return story;
 	}
 }
