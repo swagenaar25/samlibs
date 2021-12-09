@@ -1,4 +1,4 @@
-package ip.swagenaar25.samlibs;
+package ip.swagenaar25.samlibs.lib;
 
 import org.json.JSONException;
 

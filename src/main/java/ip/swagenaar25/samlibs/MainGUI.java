@@ -8,6 +8,8 @@ package ip.swagenaar25.samlibs;
  * Class: Introduction to Programming
  */
 
+import ip.swagenaar25.samlibs.lib.Samlib;
+
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
