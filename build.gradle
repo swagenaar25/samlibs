@@ -37,3 +37,7 @@ task run(type: JavaExec) {
     mainClass = jar.manifest.attributes.get('Main-Class')
     args "--dev"
 }
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:all" << "-Werror"
+}
