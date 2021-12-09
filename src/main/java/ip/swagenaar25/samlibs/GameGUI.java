@@ -23,7 +23,7 @@ import java.util.Objects;
 
 import static ip.swagenaar25.samlibs.OutputFormat.*;
 
-public class GamePanel extends JFrame implements ActionListener {
+public class GameGUI extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 0; //stop whining compiler
 
@@ -36,7 +36,7 @@ public class GamePanel extends JFrame implements ActionListener {
 	protected Samlib samlib;
 	protected Stage stage;
 
-	public GamePanel() {
+	public GameGUI() {
 		this.stage = Stage.GET_FILE;
 
 		//set up inputs storage
@@ -88,7 +88,7 @@ public class GamePanel extends JFrame implements ActionListener {
 			}
 		}
 
-		GamePanel gui = new GamePanel();
+		GameGUI gui = new GameGUI();
 
 		gui.setTitle("SamLibs");
 

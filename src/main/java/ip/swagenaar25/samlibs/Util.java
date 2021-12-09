@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 
 public class Util {
     public static String getJarPath() {
-        if (GamePanel.DEV) {
+        if (GameGUI.DEV) {
             return "/Users/FAYOGA/IdeaProjects/SamLibs/";
         }
         String path = Util.class.getProtectionDomain().getCodeSource().getLocation().getPath().replace("/C:","");
