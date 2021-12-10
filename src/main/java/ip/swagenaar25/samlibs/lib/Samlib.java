@@ -20,6 +20,7 @@ public class Samlib {
 	public String author;
 
 	protected String rawStory;
+	protected String[] storyLines;
 	protected String rawOrder;
 
 	public boolean initialized;
@@ -131,6 +132,8 @@ public class Samlib {
 			throw new JSONStructureException("Empty story");
 		}
 
+		this.storyLines	= story_array.toList().toArray(new String[0]);
+
 		//load prompts
 		JSONObject prompts = json.getJSONObject(PROMPTS_TAG);
 		if (prompts.isEmpty()) {
@@ -212,5 +215,13 @@ public class Samlib {
 		}
 		story += "\nBy: "+this.author;
 		return story;
+	}
+
+	public String getUnfilledStory() {
+		return this.rawStory;
+	}
+
+	public String[] getRawStory() {
+		return this.storyLines;
 	}
 }

@@ -54,7 +54,7 @@ public class MainGUI extends JFrame {
 
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gui.setVisible(true);
-        game.init();
+        //game.init();
         editor.init();
     }
 

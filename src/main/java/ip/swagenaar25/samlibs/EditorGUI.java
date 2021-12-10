@@ -60,6 +60,7 @@ public class EditorGUI extends JPanel {
 
 		storyArea = new JTextArea();
 		storyArea.setFont(new Font("DialogInput", Font.PLAIN, 12));
+		storyArea.setLineWrap(true);
 
 		promptsLabel = new JLabel("Prompts:");
 		promptsLabel.setToolTipText("Use form word:Prompt");
@@ -67,6 +68,7 @@ public class EditorGUI extends JPanel {
 
 		promptsArea = new JTextArea();
 		promptsArea.setFont(new Font("DialogInput", Font.PLAIN, 12));
+		promptsArea.setLineWrap(true);
 
 		saveButton = new JButton("Save");
 		saveButton.setFont(new Font("Ink Free", Font.PLAIN, 14));
@@ -78,7 +80,7 @@ public class EditorGUI extends JPanel {
 
 		closeButton = new JButton("Close");
 		closeButton.setFont(new Font("Ink Free", Font.PLAIN, 14));
-		openButton.addActionListener(this::closeButtonPerformed);
+		closeButton.addActionListener(this::closeButtonPerformed);
 	}
 
 	public void addComponents() {
@@ -146,16 +148,6 @@ public class EditorGUI extends JPanel {
 		this.storyArea.setText("");
 		this.authorField.requestFocusInWindow();
 
-		/*JFileChooser filePicker = new JFileChooser();
-		filePicker.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
-		filePicker.setCurrentDirectory(new File(Util.getJarPath()));
-
-		filePicker.showOpenDialog(null);
-		File file = filePicker.getSelectedFile();
-		if (file==null) {
-			this.close();
-		}*/
-
 		this.samlib = new Samlib().reset();
 	}
 
@@ -163,7 +155,17 @@ public class EditorGUI extends JPanel {
 		Container parent = this.getParent();
 		parent.remove(this);
 		parent.repaint();
-		//this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+	}
+
+	private static String extractSpecialChars(String s) {
+		// \b  \t  \n  \f  \r  \"  \'  \\
+		return s
+				.replace("\\", "\\\\")
+				.replace("\b", "\\b")
+				.replace("\t", "\\t")
+				.replace("\n", "\\n")
+				.replace("\f", "\\f")
+				.replace("\r", "\\r");
 	}
 
 	public void openButtonPerformed(ActionEvent e) {
@@ -172,15 +174,34 @@ public class EditorGUI extends JPanel {
 		filePicker.setCurrentDirectory(new File(Util.getJarPath()));
 
 		filePicker.showOpenDialog(null);
-		File file = filePicker.getSelectedFile();
-		if (file==null) {
-			this.close();
-		}
 
-		try {
-			this.samlib = new Samlib().build(file);
-		} catch (IOException ex) {
-			ex.printStackTrace();
+		File file = filePicker.getSelectedFile();
+		if (file != null) {
+			try {
+				this.samlib = new Samlib().build(file);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+				this.close();
+				return;
+			}
+
+			this.authorField.setText(extractSpecialChars(this.samlib.author));
+
+			StringBuilder story_text = new StringBuilder();
+			for (String line : this.samlib.getRawStory()) {
+				story_text.append(extractSpecialChars(line)).append("\n");
+			}
+			story_text.deleteCharAt(story_text.length()-1);
+
+			this.storyArea.setText(story_text.toString());
+
+			StringBuilder prompts_text = new StringBuilder();
+			for (String word : this.samlib.prompts.keySet()) {
+				prompts_text.append(word).append(":").append(extractSpecialChars(this.samlib.prompts.getOrDefault(word, ""))).append("\n");
+			}
+			prompts_text.deleteCharAt(prompts_text.length()-1);
+
+			this.promptsArea.setText(prompts_text.toString());
 		}
 	}
 
@@ -189,6 +210,6 @@ public class EditorGUI extends JPanel {
 	}
 
 	public void closeButtonPerformed(ActionEvent e) {
-
+		close();
 	}
 }
