@@ -13,7 +13,7 @@ repositories {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'ip.swagenaar25.samlibs.GameGUI',
+        attributes 'Main-Class': 'ip.swagenaar25.samlibs.MainGUI',
                 'Implementation-Title': 'SamLibs',
                 'Implementation-Version': version
     }

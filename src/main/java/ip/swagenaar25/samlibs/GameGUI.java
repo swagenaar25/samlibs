@@ -23,7 +23,7 @@ import java.util.Objects;
 
 import static ip.swagenaar25.samlibs.OutputFormat.*;
 
-public class GameGUI extends JFrame implements ActionListener {
+public class GameGUI extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = 0; //stop whining compiler
 
@@ -37,6 +37,7 @@ public class GameGUI extends JFrame implements ActionListener {
 	protected Stage stage;
 
 	public GameGUI() {
+		super();
 		this.stage = Stage.GET_FILE;
 
 		//set up inputs storage
@@ -45,7 +46,7 @@ public class GameGUI extends JFrame implements ActionListener {
 		//set up input field
 		input = new JTextField();
 		input.addActionListener(this);
-		getContentPane().add(input, BorderLayout.SOUTH); //add it to the window
+		//this.add(input, BorderLayout.SOUTH); //add it to the window
 		input.setColumns(10);
 
 		//set up output field
@@ -54,10 +55,15 @@ public class GameGUI extends JFrame implements ActionListener {
 		output.setText("Sample Text");
 		output.setAutoscrolls(true);
 		output.setFocusable(false);
-		getContentPane().add(output, BorderLayout.CENTER);
+		//this.add(output, BorderLayout.CENTER);
 
 		//set up manager for output
 		console = new Console(output).clear();
+	}
+
+	public void addComponents() {
+		this.add(input, BorderLayout.SOUTH); //add it to the window
+		this.add(output, BorderLayout.CENTER);
 	}
 
 	public void init() throws IOException {
@@ -79,28 +85,12 @@ public class GameGUI extends JFrame implements ActionListener {
 		this.stage = Stage.GET_INPUTS;
 		this.console.println(this.samlib.currentPrompt(), PROMPT);
 	}
-	
-	public static void main(String[] args) throws IOException {
-		for (String arg : args) {
-			System.out.println(arg);
-			if (Objects.equals(arg, "--dev")) {
-				DEV = true;
-			}
-		}
-
-		GameGUI gui = new GameGUI();
-
-		gui.setTitle("SamLibs");
-
-		gui.setPreferredSize(new Dimension(800, 600));
-		gui.pack();
-		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		gui.setVisible(true);
-		gui.init();
-	}
 
 	protected void close() {
-		this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+		Container parent = this.getParent();
+		parent.remove(this);
+		parent.repaint();
+		//this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 
 	@Override
