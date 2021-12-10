@@ -1,13 +1,5 @@
 package ip.swagenaar25.samlibs;
 
-/*
- * Author: Sam Wagenaar
- * Created: 1 December 2021
- * Modified: 8 December 2021
- * Purpose: Fun Madlibs!
- * Class: Introduction to Programming
- */
-
 import ip.swagenaar25.samlibs.lib.Samlib;
 
 import javax.swing.*;

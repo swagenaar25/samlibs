@@ -89,6 +89,18 @@ public class Samlib {
 		return this;
 	}
 
+	public Samlib reset() {
+		this.rawStory = "";
+		this.rawOrder = "";
+		this.prompts = new HashMap<>();
+		this.wordChoices = new HashMap<>();
+		this.orderedWords = new HashMap<>();
+		this.words = new String[0];
+		this.author = "";
+		this.inputIndex = 0;
+		return this;
+	}
+
 	public Samlib build(File file) throws IOException {
 		initialized = true;
 
