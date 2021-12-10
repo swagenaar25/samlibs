@@ -18,8 +18,10 @@ public class Samlib {
 	public HashMap<String, String> prompts; //(word:prompt)
 	public HashMap<String, String> wordChoices;//(word:choice)
 	public String author;
+
 	protected String rawStory;
 	protected String rawOrder;
+
 	public boolean initialized;
 	public int inputIndex;
 
@@ -45,7 +47,48 @@ public class Samlib {
 		this.wordChoices.put(this.currentWord(), input.replace("{", "").replace("}", ""));
 		this.inputIndex++;
 	}
-	
+
+	public Samlib save(File file) throws IOException {
+		if (!initialized) {
+			throw new IllegalStateException("Cannot save without being marked as initialized");
+		}
+		JSONObject json = new JSONObject();
+
+		JSONArray story_array = new JSONArray();
+		String temp = this.rawStory;
+		while (temp.contains("\n")) {
+			int index = temp.indexOf("\n");
+			story_array.put(temp.substring(0,index));
+			temp = temp.substring(index);
+		}
+
+		json.put(STORY_TAG, story_array);
+
+		JSONObject prompt_object = new JSONObject();
+		for (String key : this.prompts.keySet()) {
+			prompt_object.put(key, this.prompts.get(key));
+		}
+
+		json.put(PROMPTS_TAG, prompt_object);
+
+		StringBuilder order = new StringBuilder();
+
+		for (Integer i : this.orderedWords.keySet()) {
+			order.append(this.orderedWords.get(i)).append(";");
+		}
+
+		String orderString = order.toString();
+
+		json.put(ORDER_TAG, orderString);
+
+		json.put(AUTHOR_TAG, this.author);
+
+		Path path = Path.of(file.getAbsolutePath());
+		Files.writeString(path, json.toString(4));
+
+		return this;
+	}
+
 	public Samlib build(File file) throws IOException {
 		initialized = true;
 
