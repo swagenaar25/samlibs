@@ -6,12 +6,12 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ContainerListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
-
-import static ip.swagenaar25.samlibs.OutputFormat.*;
+import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class EditorGUI extends JPanel {
 
@@ -33,6 +33,8 @@ public class EditorGUI extends JPanel {
 	protected JButton closeButton;
 
 	protected Samlib samlib;
+
+	protected Consumer<Object> onClose;
 
 	public EditorGUI() {
 		super();
@@ -81,6 +83,10 @@ public class EditorGUI extends JPanel {
 		closeButton = new JButton("Close");
 		closeButton.setFont(new Font("Ink Free", Font.PLAIN, 14));
 		closeButton.addActionListener(this::closeButtonPerformed);
+	}
+
+	public void setOnClose(Consumer<Object> onClose) {
+		this.onClose = onClose;
 	}
 
 	public void addComponents() {
@@ -154,6 +160,7 @@ public class EditorGUI extends JPanel {
 	protected void close() {
 		Container parent = this.getParent();
 		parent.remove(this);
+		this.onClose.accept(this);
 		parent.repaint();
 	}
 
@@ -166,6 +173,19 @@ public class EditorGUI extends JPanel {
 				.replace("\n", "\\n")
 				.replace("\f", "\\f")
 				.replace("\r", "\\r");
+	}
+
+	private static String parseSpecialChars(String s) {
+		// \b  \t  \n  \f  \r  \"  \'  \\
+		return s
+				.replace("\\b", "\b")
+				.replace("\\t", "\t")
+				.replace("\\n", "\n")
+				.replace("\\f", "\f")
+				.replace("\\r", "\r")
+				.replace("\\\"","\"")
+				.replace("\\\'", "\'")
+				.replace("\\\\", "\\");
 	}
 
 	public void openButtonPerformed(ActionEvent e) {
@@ -206,7 +226,60 @@ public class EditorGUI extends JPanel {
 	}
 
 	public void saveButtonPerformed(ActionEvent e) {
+		JFileChooser filePicker = new JFileChooser();
+		filePicker.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
+		filePicker.setCurrentDirectory(new File(Util.getJarPath()));
 
+		filePicker.showSaveDialog(null);
+
+		File file = filePicker.getSelectedFile();
+
+		/*
+		storyLines
+		prompts
+		orderedWords
+		author
+		 */
+
+		if (file != null) {
+			this.samlib.reset();
+
+			this.samlib.author = this.authorField.getText();
+
+			String story = this.storyArea.getText();
+			String[] storyLines = story.split("\n");
+
+			ArrayList<String> parsedStoryLines = new ArrayList<>();
+
+			for (String line : storyLines) {
+				parsedStoryLines.add(parseSpecialChars(line));
+			}
+
+			this.samlib.storyLines = parsedStoryLines.toArray(new String[0]);
+
+			String[] promptLines = this.promptsArea.getText().split("\n");
+
+			int index = 0;
+
+			for (String compound : promptLines) {
+				String[] split = compound.split(":", 2);
+				String word = split[0];
+				String prompt = parseSpecialChars(split[1]);
+
+				this.samlib.orderedWords.put(index, word);
+				this.samlib.prompts.put(word, prompt);
+
+				index++;
+			}
+
+			this.samlib.initialized = true;
+
+			try {
+				this.samlib.save(file);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	public void closeButtonPerformed(ActionEvent e) {

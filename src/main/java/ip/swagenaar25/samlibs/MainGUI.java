@@ -2,8 +2,10 @@ package ip.swagenaar25.samlibs;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.Objects;
 
 /*
@@ -21,19 +23,99 @@ public class MainGUI extends JFrame {
     protected GameGUI game;
     protected EditorGUI editor;
 
+    protected JButton playButton;
+    protected JButton editButton;
+
     public MainGUI(GameGUI game, EditorGUI editor) {
         super();
         this.game = game;
         this.editor = editor;
+
+        this.editor.setOnClose(this::onPanelClose);
+        this.game.setOnClose(this::onPanelClose);
+
+        this.playButton = new JButton("Play a Samlib");
+        this.playButton.setFont(new Font("Ink Free", Font.PLAIN, 14));
+        this.playButton.addActionListener(this::playClicked);
+
+        this.editButton = new JButton("Edit a Samlib");
+        this.editButton.setFont(new Font("Ink Free", Font.PLAIN, 14));
+        this.editButton.addActionListener(this::editClicked);
+
         getContentPane().setLayout(new BorderLayout(0, 0));
-        //getContentPane().add(this.game, BorderLayout.CENTER);
-        getContentPane().add(this.editor, BorderLayout.CENTER);
 
-        game.setLayout(new BorderLayout(0,0));
+        this.game.setLayout(new BorderLayout(0,0));
 
-        //game.addComponents();
-        editor.addComponents();
+        this.addButtons();
     }
+
+    protected void removeButtons() {
+        getContentPane().remove(this.editButton);
+        getContentPane().remove(this.playButton);
+    }
+
+    protected void addButtons() {
+        getContentPane().add(this.playButton, BorderLayout.NORTH);
+        getContentPane().add(this.editButton, BorderLayout.SOUTH);
+    }
+
+    public void playClicked(ActionEvent e) {
+        this.removeButtons();
+        this.game.removeAll();
+
+        getContentPane().add(this.game, BorderLayout.CENTER);
+        this.game.addComponents();
+
+        getContentPane().repaint();
+
+        try {
+            this.game.init();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+
+            getContentPane().remove(this.game);
+            this.addButtons();
+
+            getContentPane().repaint();
+        }
+    }
+
+    public void editClicked(ActionEvent e) {
+        this.removeButtons();
+        this.editor.removeAll();
+
+        getContentPane().add(this.editor, BorderLayout.CENTER);
+        this.editor.addComponents();
+
+        this.pack();
+
+        this.setVisible(true);
+
+        getContentPane().repaint();
+
+        try {
+            this.editor.init();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+
+            getContentPane().remove(this.editor);
+            this.addButtons();
+
+            getContentPane().repaint();
+        }
+    }
+
+    protected void close() {
+        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+    }
+
+    public void onPanelClose(Object caller) {
+        getContentPane().remove(this.editor);
+        getContentPane().remove(this.game);
+        this.addButtons();
+        getContentPane().repaint();
+    }
+
     public static void main(String[] args) throws IOException {
         for (String arg : args) {
             System.out.println(arg);
@@ -54,11 +136,5 @@ public class MainGUI extends JFrame {
 
         gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gui.setVisible(true);
-        //game.init();
-        editor.init();
-    }
-
-    protected void close() {
-        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 }

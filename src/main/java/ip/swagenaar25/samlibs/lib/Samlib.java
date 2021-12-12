@@ -20,7 +20,7 @@ public class Samlib {
 	public String author;
 
 	protected String rawStory;
-	protected String[] storyLines;
+	public String[] storyLines;
 	protected String rawOrder;
 
 	public boolean initialized;
@@ -55,13 +55,7 @@ public class Samlib {
 		}
 		JSONObject json = new JSONObject();
 
-		JSONArray story_array = new JSONArray();
-		String temp = this.rawStory;
-		while (temp.contains("\n")) {
-			int index = temp.indexOf("\n");
-			story_array.put(temp.substring(0,index));
-			temp = temp.substring(index);
-		}
+		JSONArray story_array = new JSONArray(this.storyLines);
 
 		json.put(STORY_TAG, story_array);
 

@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import static ip.swagenaar25.samlibs.OutputFormat.*;
 
@@ -27,6 +28,8 @@ public class GameGUI extends JPanel implements ActionListener {
 	protected Console console;
 	protected Samlib samlib;
 	protected Stage stage;
+
+	protected Consumer<Object> onClose;
 
 	public GameGUI() {
 		super();
@@ -51,6 +54,10 @@ public class GameGUI extends JPanel implements ActionListener {
 
 		//set up manager for output
 		console = new Console(output).clear();
+	}
+
+	public void setOnClose(Consumer<Object> onClose) {
+		this.onClose = onClose;
 	}
 
 	public void addComponents() {
@@ -81,8 +88,8 @@ public class GameGUI extends JPanel implements ActionListener {
 	protected void close() {
 		Container parent = this.getParent();
 		parent.remove(this);
+		this.onClose.accept(this);
 		parent.repaint();
-		//this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
 	}
 
 	@Override
