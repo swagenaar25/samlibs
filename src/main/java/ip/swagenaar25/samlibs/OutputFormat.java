@@ -2,6 +2,7 @@ package ip.swagenaar25.samlibs;
 
 import java.awt.*;
 
+//store different formats for game output
 public enum OutputFormat {
     STORY(Color.DARK_GRAY, false, true, false),
     PROMPT(Color.BLACK, true, false, false),

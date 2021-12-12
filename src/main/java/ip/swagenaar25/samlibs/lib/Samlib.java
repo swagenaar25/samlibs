@@ -11,44 +11,49 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Set;
 
-public class Samlib {
+public class Samlib { //data container for a Samlib, includes loader and writer
 	
-	public String[] words;
-	public HashMap<Integer, String> orderedWords; //(index:word)
-	public HashMap<String, String> prompts; //(word:prompt)
-	public HashMap<String, String> wordChoices;//(word:choice)
-	public String author;
+	public String[] words; //list of words that get replaced
+	public HashMap<Integer, String> orderedWords; //Words, in the order that we should be prompting them (index:word)
+	public HashMap<String, String> prompts; //The prompts for each word (word:prompt)
+	public HashMap<String, String> wordChoices;//The user's choices for each substitution (word:choice)
+	public String author; //who made this story
 
-	protected String rawStory;
-	public String[] storyLines;
-	protected String rawOrder;
+	protected String rawStory; //raw story date
+	protected String rawOrder; //raw order data
+	public String[] storyLines; //the separate lines of the story (as defined in JSON), newlines in the story do not make a separate line here
 
-	public boolean initialized;
-	public int inputIndex;
+	public boolean initialized; //whether we have all the data that is needed for playing or saving
+	public int inputIndex; //which word we are asking the user for
 
-	protected static String STORY_TAG = "story";
-	protected static String PROMPTS_TAG = "prompts";
-	protected static String ORDER_TAG = "order";
-	protected static String AUTHOR_TAG = "author";
+	//prevent typos in other places, allow globally changing JSON key names
+	protected static final String STORY_TAG = "story";
+	protected static final String PROMPTS_TAG = "prompts";
+	protected static final String ORDER_TAG = "order";
+	protected static final String AUTHOR_TAG = "author";
 	
 	public Samlib() {
 		initialized = false;
 		inputIndex = 0;
 	}
 
+	//which word are we currently getting replacement for
 	public String currentWord() {
 		return this.orderedWords.get(this.inputIndex);
 	}
 
+	//what is the prompt for this word
 	public String currentPrompt() {
 		return this.prompts.get(this.currentWord());
 	}
 
+	//store user's input, advance to next input
 	public void pushInput(String input) {
 		this.wordChoices.put(this.currentWord(), input.replace("{", "").replace("}", ""));
 		this.inputIndex++;
 	}
 
+	//write data to JSON file
 	public Samlib save(File file) throws IOException {
 		if (!initialized) {
 			throw new IllegalStateException("Cannot save without being marked as initialized");
@@ -86,6 +91,7 @@ public class Samlib {
 		return this;
 	}
 
+	//set stuff to default values and initialize it
 	public Samlib reset() {
 		this.rawStory = "";
 		this.rawOrder = "";
@@ -98,6 +104,7 @@ public class Samlib {
 		return this;
 	}
 
+	//load from file
 	public Samlib build(File file) throws IOException {
 		initialized = true;
 
@@ -202,6 +209,7 @@ public class Samlib {
 		return this;
 	}
 
+	//return single string with all word replacements filled in
 	public String getFilledStory() {
 		String story = this.rawStory;
 		for (String word : this.words) {
@@ -213,11 +221,8 @@ public class Samlib {
 		return story;
 	}
 
-	public String getUnfilledStory() {
-		return this.rawStory;
-	}
-
-	public String[] getRawStory() {
+	//get raw lines, editor needs this
+	public String[] getRawLines() {
 		return this.storyLines;
 	}
 }

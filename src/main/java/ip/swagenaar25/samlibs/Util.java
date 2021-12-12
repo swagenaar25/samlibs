@@ -4,6 +4,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
 public class Util {
+    //get location of currently running JAR file
     public static String getJarPath() {
         if (GameGUI.DEV) {
             return "/Users/FAYOGA/IdeaProjects/SamLibs/";

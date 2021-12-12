@@ -6,38 +6,43 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ContainerListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
+@SuppressWarnings("serial")
 public class EditorGUI extends JPanel {
-
-	private static final long serialVersionUID = 0; //stop whining compiler
 
 	public static boolean DEV = false;
 
+	//text and input for author
 	protected JLabel authorLabel;
 	protected JTextField authorField;
 
+	//dito for story
 	protected JLabel storyLabel;
 	protected JTextArea storyArea;
 
+	//dito for prompts
 	protected JLabel promptsLabel;
 	protected JTextArea promptsArea;
 
+	//BUTTONS!!!
 	protected JButton saveButton;
 	protected JButton openButton;
 	protected JButton closeButton;
 
+	//data storage
 	protected Samlib samlib;
 
+	//method to call when we close, lets MainGUI put back the buttons
 	protected Consumer<Object> onClose;
 
 	public EditorGUI() {
 		super();
+
+		//CREATE all the components, but do not ADD them to the panel
 
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 99, 0};
@@ -85,10 +90,12 @@ public class EditorGUI extends JPanel {
 		closeButton.addActionListener(this::closeButtonPerformed);
 	}
 
+	//does what it says on the tin
 	public void setOnClose(Consumer<Object> onClose) {
 		this.onClose = onClose;
 	}
 
+	//actually add the components in, has to be done separately b/c if it goes in wrong order nothing shows up
 	public void addComponents() {
 		GridBagConstraints gbc_authorLabel = new GridBagConstraints();
 		gbc_authorLabel.insets = new Insets(0, 0, 5, 5);
@@ -148,6 +155,7 @@ public class EditorGUI extends JPanel {
 		add(closeButton, gbc_closeButton);
 	}
 
+	//reset/prepare editor for use, should happen AFTER addComponents()
 	public void init() throws IOException {
 		this.authorField.setText("");
 		this.promptsArea.setText("");
@@ -157,6 +165,7 @@ public class EditorGUI extends JPanel {
 		this.samlib = new Samlib().reset();
 	}
 
+	//helper function to hide the editor and notify MainGUI we are done
 	protected void close() {
 		Container parent = this.getParent();
 		parent.remove(this);
@@ -164,6 +173,8 @@ public class EditorGUI extends JPanel {
 		parent.repaint();
 	}
 
+	//convert special characters to normal characters in gui
+	//so that user can have same editing flexibility as in raw JSON
 	private static String extractSpecialChars(String s) {
 		// \b  \t  \n  \f  \r  \"  \'  \\
 		return s
@@ -175,6 +186,7 @@ public class EditorGUI extends JPanel {
 				.replace("\r", "\\r");
 	}
 
+	//convert back to real special characters
 	private static String parseSpecialChars(String s) {
 		// \b  \t  \n  \f  \r  \"  \'  \\
 		return s
@@ -188,6 +200,7 @@ public class EditorGUI extends JPanel {
 				.replace("\\\\", "\\");
 	}
 
+	//load up a file and set our input fields to match
 	public void openButtonPerformed(ActionEvent e) {
 		JFileChooser filePicker = new JFileChooser();
 		filePicker.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
@@ -208,7 +221,7 @@ public class EditorGUI extends JPanel {
 			this.authorField.setText(extractSpecialChars(this.samlib.author));
 
 			StringBuilder story_text = new StringBuilder();
-			for (String line : this.samlib.getRawStory()) {
+			for (String line : this.samlib.getRawLines()) {
 				story_text.append(extractSpecialChars(line)).append("\n");
 			}
 			story_text.deleteCharAt(story_text.length()-1);
@@ -225,6 +238,7 @@ public class EditorGUI extends JPanel {
 		}
 	}
 
+	//save input fields into a file
 	public void saveButtonPerformed(ActionEvent e) {
 		JFileChooser filePicker = new JFileChooser();
 		filePicker.setFileFilter(new FileNameExtensionFilter("JSON Files", "json"));
@@ -235,6 +249,8 @@ public class EditorGUI extends JPanel {
 		File file = filePicker.getSelectedFile();
 
 		/*
+		Values of Samlib that need to be set to save successfully:
+
 		storyLines
 		prompts
 		orderedWords
@@ -282,6 +298,7 @@ public class EditorGUI extends JPanel {
 		}
 	}
 
+	//allow closing from our cute little close button
 	public void closeButtonPerformed(ActionEvent e) {
 		close();
 	}

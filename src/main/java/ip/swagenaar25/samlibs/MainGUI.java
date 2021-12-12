@@ -16,13 +16,14 @@ import java.util.Objects;
  * Class: Introduction to Programming
  */
 
+@SuppressWarnings("serial")
 public class MainGUI extends JFrame {
 
-    private static final long serialVersionUID = 0; //stop whining compiler
-
+    //the panels
     protected GameGUI game;
     protected EditorGUI editor;
 
+    //BUTTONS!!!
     protected JButton playButton;
     protected JButton editButton;
 
@@ -49,16 +50,19 @@ public class MainGUI extends JFrame {
         this.addButtons();
     }
 
+    //hide the buttons when Editor/Game is visible
     protected void removeButtons() {
         getContentPane().remove(this.editButton);
         getContentPane().remove(this.playButton);
     }
 
+    //put the buttons back
     protected void addButtons() {
         getContentPane().add(this.playButton, BorderLayout.NORTH);
         getContentPane().add(this.editButton, BorderLayout.SOUTH);
     }
 
+    //handle play button, set up game
     public void playClicked(ActionEvent e) {
         this.removeButtons();
         this.game.removeAll();
@@ -80,6 +84,7 @@ public class MainGUI extends JFrame {
         }
     }
 
+    //handle edit button, set up editor
     public void editClicked(ActionEvent e) {
         this.removeButtons();
         this.editor.removeAll();
@@ -105,10 +110,12 @@ public class MainGUI extends JFrame {
         }
     }
 
+    //helped function to close the window
     protected void close() {
         this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 
+    //restore buttons and make sure panels are hidden when a panel exits
     public void onPanelClose(Object caller) {
         getContentPane().remove(this.editor);
         getContentPane().remove(this.game);
@@ -117,7 +124,7 @@ public class MainGUI extends JFrame {
     }
 
     public static void main(String[] args) throws IOException {
-        for (String arg : args) {
+        for (String arg : args) { //check if we are running in IDE
             System.out.println(arg);
             if (Objects.equals(arg, "--dev")) {
                 GameGUI.DEV = true;

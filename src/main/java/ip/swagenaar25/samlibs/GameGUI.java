@@ -16,18 +16,17 @@ import java.util.function.Consumer;
 
 import static ip.swagenaar25.samlibs.OutputFormat.*;
 
+@SuppressWarnings("serial")
 public class GameGUI extends JPanel implements ActionListener {
 
-	private static final long serialVersionUID = 0; //stop whining compiler
-
+	//keep track of whether we are in a dev environment, set default open and save path to not try to check the JAR file
 	public static boolean DEV = false;
 
-	protected JTextField input;
-	protected JTextPane output;
-	protected ArrayDeque<String> inputs;
-	protected Console console;
-	protected Samlib samlib;
-	protected Stage stage;
+	protected JTextField input; //user input
+	protected JTextPane output; //display to user
+	protected Console console; //manages the output
+	protected Samlib samlib; //store data
+	protected Stage stage; //keep track of what we are doing right now
 
 	protected Consumer<Object> onClose;
 
@@ -35,13 +34,9 @@ public class GameGUI extends JPanel implements ActionListener {
 		super();
 		this.stage = Stage.GET_FILE;
 
-		//set up inputs storage
-		inputs = new ArrayDeque<>();
-
 		//set up input field
 		input = new JTextField();
 		input.addActionListener(this);
-		//this.add(input, BorderLayout.SOUTH); //add it to the window
 		input.setColumns(10);
 
 		//set up output field
@@ -50,21 +45,23 @@ public class GameGUI extends JPanel implements ActionListener {
 		output.setText("Sample Text");
 		output.setAutoscrolls(true);
 		output.setFocusable(false);
-		//this.add(output, BorderLayout.CENTER);
 
 		//set up manager for output
 		console = new Console(output).clear();
 	}
 
+	//it says it all on the tin
 	public void setOnClose(Consumer<Object> onClose) {
 		this.onClose = onClose;
 	}
 
+	//actually addComponents, see EditorGUI for why it is separate
 	public void addComponents() {
-		this.add(input, BorderLayout.SOUTH); //add it to the window
+		this.add(input, BorderLayout.SOUTH);
 		this.add(output, BorderLayout.CENTER);
 	}
 
+	//reset fields, ask user what file they want to play
 	public void init() throws IOException {
 		this.input.setText("");
 		this.console.clear();
@@ -85,6 +82,7 @@ public class GameGUI extends JPanel implements ActionListener {
 		this.console.println(this.samlib.currentPrompt(), PROMPT);
 	}
 
+	//just like in EditorGUI
 	protected void close() {
 		Container parent = this.getParent();
 		parent.remove(this);
@@ -92,6 +90,7 @@ public class GameGUI extends JPanel implements ActionListener {
 		parent.repaint();
 	}
 
+	//handle user inputs!
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String input = e.getActionCommand();
