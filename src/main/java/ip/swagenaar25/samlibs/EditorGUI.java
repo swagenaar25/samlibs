@@ -65,7 +65,7 @@ public class EditorGUI extends JPanel {
 		storyArea.setLineWrap(true);
 
 		promptsLabel = new JLabel("Prompts:");
-		promptsLabel.setToolTipText("Use form word:Prompt");
+		promptsLabel.setToolTipText("Use form word:This is a prompt: ");
 		promptsLabel.setFont(new Font("Georgia", Font.PLAIN, 14));
 
 		promptsArea = new JTextArea();
